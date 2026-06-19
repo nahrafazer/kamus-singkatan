@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kamus Singkatan Digital</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-3xl font-bold text-center text-indigo-600 mb-8">📖 Kamus Singkatan</h1>
+
+        <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">Tambah Singkatan Baru</h2>
+            <form id="formSingkatan" class="flex flex-col sm:flex-row gap-3">
+                <input type="text" id="singkatan" placeholder="Contoh: ASAP" class="border border-gray-300 rounded-lg px-4 py-2 uppercase flex-1 sm:w-1/3 focus:outline-indigo-500" required>
+                <input type="text" id="arti" placeholder="Kepanjangan / Arti" class="border border-gray-300 rounded-lg px-4 py-2 flex-1 focus:outline-indigo-500" required>
+                <button type="submit" id="btnSimpan" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded-lg transition-colors">Simpan</button>
+            </form>
+        </div>
+
+        <div class="mb-6">
+            <input type="text" id="search" placeholder="Cari singkatan atau arti..." class="w-full border border-gray-300 rounded-xl px-4 py-3 shadow-sm focus:outline-indigo-500">
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div id="daftarKamus" class="divide-y divide-gray-200">
+                <p class="p-8 text-center text-gray-500">Memuat data...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let semuaData = {};
+
+        // Ambil data saat halaman dimuat
+        async function loadKamus() {
+            try {
+                const res = await fetch('/api/kamus');
+                semuaData = await res.json();
+                renderKamus(semuaData);
+            } catch (err) {
+                console.error("Gagal memuat data", err);
+            }
+        }
+
+        // Fungsi menampilkan data ke HTML
+        function renderKamus(data, filter = '') {
+            const container = document.getElementById('daftarKamus');
+            container.innerHTML = '';
+
+            const keys = Object.keys(data).filter(key => 
+                key.toLowerCase().includes(filter.toLowerCase()) || 
+                data[key].toLowerCase().includes(filter.toLowerCase())
+            ).sort();
+
+            if (keys.length === 0) {
+                container.innerHTML = '<p class="p-8 text-center text-gray-500">Tidak ada singkatan ditemukan.</p>';
+                return;
+            }
+
+            keys.forEach(key => {
+                const item = document.createElement('div');
+                item.className = 'p-4 hover:bg-gray-50';
+                item.innerHTML = `
+                    <span class="inline-block bg-indigo-100 text-indigo-800 font-bold px-2.5 py-1 rounded text-sm uppercase">${key}</span>
+                    <p class="mt-1 text-gray-600">${data[key]}</p>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Handle Form Submit (Tambah Data)
+        document.getElementById('formSingkatan').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const singkatan = document.getElementById('singkatan').value.toUpperCase().trim();
+            const arti = document.getElementById('arti').value.trim();
+            const btn = document.getElementById('btnSimpan');
+
+            btn.disabled = true;
+            btn.innerText = 'Menyimpan...';
+
+            try {
+                const res = await fetch('/api/kamus', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ singkatan, arti })
+                });
+
+                if (res.ok) {
+                    document.getElementById('singkatan').value = '';
+                    document.getElementById('arti').value = '';
+                    loadKamus();
+                } else {
+                    alert('Gagal menyimpan data.');
+                }
+            } catch (err) {
+                alert('Terjadi kesalahan jaringan.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Simpan';
+            }
+        });
+
+        // Handle Fitur Pencarian
+        document.getElementById('search').addEventListener('input', (e) => {
+            renderKamus(semuaData, e.target.value);
+        });
+
+        // Load data pertama kali
+        loadKamus();
+    </script>
+</body>
+</html>
