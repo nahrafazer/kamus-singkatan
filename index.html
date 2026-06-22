@@ -4,7 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kamus Singkatan Cloud (Google Sheets)</title>
+    
+    <!-- Import Font Montserrat dari Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Konfigurasi Tailwind untuk menggunakan Montserrat -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
@@ -25,11 +43,12 @@
             <p class="text-gray-400">Database tersinkronisasi otomatis secara cloud menggunakan Google Sheets.</p>
         </header>
 
-        <div class="flex justify-center space-x-4 mb-8">
-            <button id="tabSearchBtn" onclick="switchTab('search')" class="px-6 py-2.5 bg-green-600 text-white rounded-full font-medium shadow-md transition-all flex items-center">
+        <!-- Pembaruan agar tombol sejajar di laptop, tapi menumpuk di HP -->
+        <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 w-full max-w-sm sm:max-w-none mx-auto">
+            <button id="tabSearchBtn" onclick="switchTab('search')" class="w-full sm:w-auto px-6 py-3 sm:py-2.5 bg-green-600 text-white rounded-full font-medium shadow-md transition-all flex justify-center items-center">
                 <i class="fas fa-search mr-2"></i> Cari Singkatan
             </button>
-            <button id="tabAddBtn" onclick="switchTab('add')" class="px-6 py-2.5 bg-gray-800 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded-full font-medium border border-gray-700 transition-all flex items-center">
+            <button id="tabAddBtn" onclick="switchTab('add')" class="w-full sm:w-auto px-6 py-3 sm:py-2.5 bg-gray-800 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded-full font-medium border border-gray-700 transition-all flex justify-center items-center">
                 <i class="fas fa-plus mr-2"></i> Tambah Baru
             </button>
         </div>
@@ -302,17 +321,21 @@
             renderResults(filteredData);
         }
 
+        // Pembaruan class tombol agar responsivitas tidak hilang saat tab diklik
         function switchTab(tabName) {
+            const activeClass = "w-full sm:w-auto px-6 py-3 sm:py-2.5 bg-green-600 text-white rounded-full font-medium shadow-md transition-all flex justify-center items-center";
+            const inactiveClass = "w-full sm:w-auto px-6 py-3 sm:py-2.5 bg-gray-800 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded-full font-medium border border-gray-700 transition-all flex justify-center items-center";
+
             if (tabName === 'search') {
                 searchView.classList.remove('hidden'); addView.classList.add('hidden');
-                document.getElementById('tabSearchBtn').className = "px-6 py-2.5 bg-green-600 text-white rounded-full font-medium shadow-md transition-all flex items-center";
-                document.getElementById('tabAddBtn').className = "px-6 py-2.5 bg-gray-800 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded-full font-medium border border-gray-700 transition-all flex items-center";
+                document.getElementById('tabSearchBtn').className = activeClass;
+                document.getElementById('tabAddBtn').className = inactiveClass;
                 searchInput.focus();
                 handleSearch();
             } else {
                 searchView.classList.add('hidden'); addView.classList.remove('hidden');
-                document.getElementById('tabAddBtn').className = "px-6 py-2.5 bg-green-600 text-white rounded-full font-medium shadow-md transition-all flex items-center";
-                document.getElementById('tabSearchBtn').className = "px-6 py-2.5 bg-gray-800 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded-full font-medium border border-gray-700 transition-all flex items-center";
+                document.getElementById('tabAddBtn').className = activeClass;
+                document.getElementById('tabSearchBtn').className = inactiveClass;
                 document.getElementById('inputSingkatan').focus();
                 if(searchInput.value) document.getElementById('inputSingkatan').value = searchInput.value.toUpperCase();
             }
